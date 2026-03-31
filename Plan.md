@@ -1,1 +1,5 @@
-Will put a schedule in for following an introduction to computation for stochastic partial differential equations. 
+**Scheduling:**
+Weekly meetings on Tuesday morning (unless agreed to change). Discuss algorithm from book and coding session.
+
+**First Deliverable:**
+Implement FEM (hopefully firedrake) and Spectral methods for Stochastic Heat Equation with comparision and convergence rates. 

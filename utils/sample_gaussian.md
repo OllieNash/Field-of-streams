@@ -1,6 +1,6 @@
 # Sampling Gaussian Measures via Karhunen–Loève Expansion
 
-Let $\mu$ be a Gaussian measure with mean $m$ and covariance operator $K$ in some real separable infinite-dimensional Hilbert space $\mathcal{H}$. Suppose that $K$ is a self-adjoint, positive trace-class operator with positive eigenvalues $\{\lambda_k\}_{k \ge 1}$ and a corresponding set $\{e_k\}_{k \ge 1}$ of orthonormal eigenvectors.
+Let $\mu$ be a Gaussian measure with mean $m$ and covariance operator $K$ in some real separable infinite-dimensional Hilbert space $\mathcal{H}$. Suppose that $K$ is a self-adjoint, positive trace-class operator with positive eigenvalues $\lambda_k$ and a corresponding set $e_k$ of orthonormal eigenvectors, $k\ge 1$.
 
 Then, by the Karhunen–Loève theorem, any $\xi \sim \mathcal{N}(m, K)$ has the representation
 

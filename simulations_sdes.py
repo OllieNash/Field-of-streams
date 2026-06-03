@@ -1,5 +1,5 @@
 import numpy as np
-
+from Plotter import plot_sde_path
 
 def drift(x, mu, theta):
     return theta * (mu - x)
@@ -83,13 +83,7 @@ if __name__ == "__main__":
         beta=beta,
     )
 
-    for i in range(x.shape[0]):
-        plt.plot(x[i, :], alpha=0.7)
-        
-    plt.title("Trajectories of Particles over Time")
-    plt.xlabel("Time Steps")
-    plt.ylabel("Position")
-    plt.show()   
+    plot_sde_path(path=x)
 
 
 

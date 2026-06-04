@@ -11,6 +11,7 @@ https://arxiv.org/abs/1803.03765
 
 Simulation schemes for SDEs: 
 https://arxiv.org/pdf/2508.19040 
+https://wias-berlin.de/people/bayerc/files/euler_talk_handout.pdf 
 
 More papers to be added, currently undergoing literature review for more complete convergence results.
 

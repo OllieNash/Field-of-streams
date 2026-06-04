@@ -25,16 +25,19 @@ ROOT = Path(__file__).resolve().parents[1]
 UTILS = ROOT / "utils"
 if str(UTILS) not in sys.path:
     sys.path.insert(0, str(UTILS))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from heat import heat_step_implicit
 from sample_gaussian import sample_gaussian_measure
+from Plotter import plot_spde_path
 
 
 def simulate_spde(
     initial_state: np.ndarray,
     dt: float = 1e-3,
     dx: float | None = None,
-    beta: float = 0.1,
+    beta: float = 1,
     nu: float = 0.5,
     rng: np.random.Generator | None = None,
 ) -> np.ndarray:
@@ -71,9 +74,47 @@ def simulate_spde(
     dx = float(dx) if dx is not None else 1.0 / state.shape[-1]
     sigma = np.sqrt(2.0 / beta)
 
-    noise = rng.normal(0.0, np.sqrt(dt), size=state.shape)
+    noise = rng.normal(0.0, np.sqrt(dt/dx), size=state.shape)
     rhs = state + sigma * noise
     return heat_step_implicit(rhs, h=dx, dt=dt, nu=nu)
+
+def multi_sim(
+    T_steps,
+    u_0, 
+    dt,
+    dx,
+    beta,
+    nu,
+    rng,
+):
+    """
+    Simulate the 1D stochastic heat equation over multiple timesteps.
+
+    Iteratively advances the stochastic heat equation from an initial condition
+    for a specified number of steps, storing the solution at each timestep.
+
+    Args:
+        T_steps: Number of timesteps to simulate.
+        u_0: Initial field condition with shape (N,) or (M, N).
+        dt: Time step size.
+        dx: Spatial grid spacing.
+        beta: Noise-strength parameter.
+        nu: Diffusion coefficient.
+        rng: Random number generator for reproducibility.
+
+    Returns:
+        List of fields at each timestep, starting with u_0 and including
+        T_steps additional states.
+    """
+    u = [] 
+    u.append(u_0)
+    u_prev =u_0
+    for t in range(0,T_steps):
+            u_next = simulate_spde(u_prev, dt=dt, dx=dx, beta=0.1, nu=0.5, rng=rng)
+            u.append(u_next)
+            u_prev = u_next
+    return u
+
 
 
 if __name__ == "__main__":
@@ -82,14 +123,14 @@ if __name__ == "__main__":
     # Demo settings.
     M = 256
     grid = np.linspace(0.0, 1.0, M, endpoint=False)
-    dx = grid[1] - grid[0]
+    dx = 1/M
     weights = np.full(M, dx)
 
     # Sample an initial condition from the Gaussian field model.
-    se_kernel = lambda x, y: np.exp(-0.5 * (x - y) ** 2 / 0.05 ** 2)
+    periodic_kernel = lambda x, y: np.exp((-2 * np.sin(np.pi*(x - y)) ** 2) / 0.2**2)
     mean = lambda x: np.zeros_like(x)
-    u0_samples, gamma = sample_gaussian_measure(
-        kernel=se_kernel,
+    u0_samples = sample_gaussian_measure(
+        kernel=periodic_kernel,
         mean=mean,
         N=50,
         grid=grid,
@@ -98,18 +139,15 @@ if __name__ == "__main__":
         rng=np.random.default_rng(42),
     )
     u0 = u0_samples[0]
-
     # Take one stochastic heat step.
-    dt = 1e-3
-    u1 = simulate_spde(u0, dt=dt, dx=dx, beta=0.1, nu=0.5, rng=np.random.default_rng(123))
+    dt = 1e-4
+    T_steps = 1000
+    u_prev = u0
+    rng=np.random.default_rng(seed=2345)
+    u=  multi_sim(T_steps,u0,dt,dx,beta=1,nu=0.5,rng=rng)
 
+    print(dt)
+    print((dx**2)/0.5)
+    print((0.5*dt)/(dx**2))
     # Plot the initial and updated states.
-    plt.figure(figsize=(8, 4.5), constrained_layout=True)
-    plt.plot(grid, u0, lw=1.6, label=r"$u(t=0)$")
-    plt.plot(grid, u1, lw=1.6, label=r"$u(t=\Delta t)$")
-    plt.title("One-step stochastic heat equation")
-    plt.xlabel("x")
-    plt.ylabel("u(x)")
-    plt.grid(alpha=0.3)
-    plt.legend()
-    plt.show()
+    plot_spde_path(u,grid,T_steps,u0)

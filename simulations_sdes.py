@@ -1,5 +1,18 @@
+
+import sys
+from pathlib import Path
+
 import numpy as np
-from Plotter import plot_sde_path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+UTILS = ROOT / "utils"
+if str(UTILS) not in sys.path:
+    sys.path.insert(0, str(UTILS))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from utils.Plotter import plot_sde_path, plot_dist_sde
 
 def drift(x, mu, theta):
     return theta * (mu - x)
@@ -114,7 +127,7 @@ def heun(
 
 
 if __name__ == "__main__":
-    n_particles = 3
+    n_particles = 1000
     t_final = 100.0
     h = 0.01
     theta = 5.0
@@ -139,6 +152,7 @@ if __name__ == "__main__":
     )
 
     plot_sde_path(path=x_em)
+    plot_dist_sde(path=x_em)
     plot_sde_path(path=x_heun)
-
+    plot_dist_sde(path=x_heun)
 

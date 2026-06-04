@@ -28,6 +28,7 @@ def sample_gaussian_measure(
     Returns:
         samples:   NDArray of shape (n_samples, M).
     """
+
     M = len(grid)
     if not 1 <= N <= M:
         raise ValueError(f"Require 1 <= N <= M, got N={N}, M={M}.")

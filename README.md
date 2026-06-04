@@ -62,11 +62,10 @@ python utils/heat.py
 - To run other experiments, open `heat_eqn/main.py` or call the functions from a
 	small driver script or an interactive session (Jupyter/REPL). The code is
 	modular so you can import `simulate_spde`, `multi_sim`, `run_dt_refinement`,
-	or plotting helpers directly.
+	or plotting helpers directly. 
 
 
 License / contact
 -----------------
-This repo is a research codebase; add a license or contact details as
-appropriate for your project.
+This repo is a open source, have not decided on a License. 
 

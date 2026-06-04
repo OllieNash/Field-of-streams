@@ -20,22 +20,24 @@ import sys
 from pathlib import Path
 from typing import Callable
 
-import numpy as np
-
 ROOT = Path(__file__).resolve().parents[1]
 UTILS = ROOT / "utils"
 if str(UTILS) not in sys.path:
     sys.path.insert(0, str(UTILS))
-
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from Plotter import plot_dist_spde
+import numpy as np
 
 from sample_gaussian import sample_gaussian_measure
 from stochastic_heat import simulate_spde
 
 
 def sample_stationary_observable(
-    n_trajectories: int = 400,
+    n_trajectories: int = 2000,
     burn_in_steps: int = 250,
     dt: float = 1e-3,
     beta: float = 0.1,
@@ -66,7 +68,7 @@ def sample_stationary_observable(
 
     # Spatial grid and quadrature weights for the Gaussian sampler.
     grid = np.linspace(0.0, 1.0, grid_size, endpoint=False)
-    dx = grid[1] - grid[0]
+    dx = 1/grid_size
     weights = np.full(grid_size, dx)
 
     if observable is None:
@@ -74,9 +76,9 @@ def sample_stationary_observable(
         observable = lambda u, dx_val: float(u[0])
 
     # Sample one initial condition from the Gaussian field model.
-    se_kernel = lambda x, y: np.exp(-0.5 * (x - y) ** 2 / 0.05 ** 2)
+    se_kernel = lambda x, y: np.exp((-2 * np.sin(np.pi*(x - y)) ** 2) / 0.2**2)
     mean = lambda x: np.zeros_like(x)
-    initial_samples, _ = sample_gaussian_measure(
+    initial_samples = sample_gaussian_measure(
         kernel=se_kernel,
         mean=mean,
         N=50,
@@ -113,7 +115,7 @@ if __name__ == "__main__":
     dt = 1e-3
     burn_in_steps = 250
     n_trajectories = 1000
-    beta = 0.1
+    beta = 1
     nu = 0.5
 
     # Example observable: first spatial marginal.
@@ -131,18 +133,4 @@ if __name__ == "__main__":
     )
 
     # Visualize initial condition and empirical law of phi(u).
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.5), constrained_layout=True)
-
-    axes[0].plot(grid, u0, lw=1.5, color="tab:blue")
-    axes[0].set_title("Sampled initial condition")
-    axes[0].set_xlabel("x")
-    axes[0].set_ylabel("u(x)")
-    axes[0].grid(alpha=0.3)
-
-    axes[1].hist(phi_samples, bins=35, density=True, alpha=0.8, color="tab:orange", edgecolor="white")
-    axes[1].set_title("Empirical stationary distribution of phi(u)")
-    axes[1].set_xlabel(r"$u_0$")
-    axes[1].set_ylabel("Density")
-    axes[1].grid(alpha=0.3)
-
-    plt.show()
+    plot_dist_spde(grid,u0,phi_samples)

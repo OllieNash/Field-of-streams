@@ -1,0 +1,3 @@
+numpy>=1.23
+matplotlib>=3.5
+# Optional: add more packages used in experiments (e.g., scipy, jax)

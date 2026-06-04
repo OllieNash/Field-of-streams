@@ -64,13 +64,6 @@ python utils/heat.py
 	modular so you can import `simulate_spde`, `multi_sim`, `run_dt_refinement`,
 	or plotting helpers directly.
 
-Help / next steps
------------------
-If you'd like, I can:
-- add a `requirements.txt` or `pyproject.toml` with pinned dependencies;
-- wire a small example script that runs a complete convergence test and
-	prints/plots the results;
-- document the public function APIs in a separate `docs/` folder.
 
 License / contact
 -----------------

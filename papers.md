@@ -3,6 +3,8 @@ Useful references are placed here. It may be useful to review lecture notes from
 **Books:**
 This is the main book we will follow: https://www.cambridge.org/core/books/an-introduction-to-computational-stochastic-pdes/01A784303F5C86644A25BFB138923090 
 
+General book on Stochastic Analysis: https://www.ma.imperial.ac.uk/~pavl/PavliotisBook.pdf 
+
 **Papers:** 
 An Explicit link between Gaussian fields and Gaussian Markov random fields:  https://lucris.lub.lu.se/ws/portalfiles/portal/5312973/1581115.pdf
 

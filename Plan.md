@@ -3,10 +3,10 @@ Weekly meetings online or in person depending on availability (all times BST). W
 **17/06 @ 15:00 online** - SPA book chapter 1-3
 **23/06 @ 14:00 online** - SPA book chapter 1-3
 **30/06 @ 15:00 90HH** - SPA/Slides on SDE simulation
-**21/07 @ 14:00 location TBC** - SPA/Slides on SDE simulation
+**23/07 @ 14:00 location TBC** - SPA/Slides on SDE simulation
 **28/07 @ 14:00 location TBC** - SPA/Slides on SDE simulation/Introduction to computational stochastic PDEs
 
-Introduction to SDEs -> numerical schemes for SDEs -> Introduction to computational stochastic PDEs 
+Introduction to SDEs -> Numerical schemes for SDEs -> Introduction to computational stochastic PDEs 
 
 
 **Progress made:**

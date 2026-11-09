@@ -18,6 +18,42 @@ def l2_norm(u, v, dx):
     return np.sqrt(np.sum((u - v)**2) * dx)
 
 
+class PreloadedGenerator:
+    """Generator stand-in that returns preloaded noise increments from a queue.
+
+    Passed as `rng` to a simulation function so that several simulations (e.g. at
+    different timesteps, or with different spatial solvers) are driven by the same
+    Brownian increments.
+    """
+
+    def __init__(self, noise_queue):
+        self._noise_queue = list(noise_queue)
+
+    def normal(self, loc=0.0, scale=1.0, size=None):
+        """Pop and return the next preloaded noise increment.
+
+        Args:
+            loc: Location parameter, added to the stored increment.
+            scale: Scale parameter (unused, for interface compatibility).
+            size: Expected shape of noise. Must match stored noise shape.
+
+        Returns:
+            The next noise increment shifted by loc.
+
+        Raises:
+            RuntimeError: If the noise queue is empty.
+            ValueError: If requested size does not match stored noise shape.
+        """
+        if not self._noise_queue:
+            raise RuntimeError("Ran out of preloaded noise increments.")
+        noise = self._noise_queue.pop(0)
+        if size is not None and tuple(np.atleast_1d(size)) != noise.shape:
+            raise ValueError(
+                f"Expected noise shape {size}, got {noise.shape} from preloaded queue."
+            )
+        return loc + noise
+
+
 def run_dt_refinement(
     simulate_fn,
     N=1024,
@@ -57,83 +93,22 @@ def run_dt_refinement(
     rng = rng or np.random.default_rng(42)
     u0 = np.zeros(N, dtype=float)
 
-    class _PreloadedGenerator:
-        """Internal generator that returns preloaded noise increments from a queue.
-        
-        Used to ensure reproducibility by controlling noise samples in refinement studies.
-        """
-        def __init__(self, noise_queue):
-            self._noise_queue = list(noise_queue)
-
-        def normal(self, loc=0.0, scale=1.0, size=None):
-            """Pop and return the next preloaded noise increment.
-            
-            Args:
-                loc: Location parameter (unused, for interface compatibility).
-                scale: Scale parameter (unused, for interface compatibility).
-                size: Expected shape of noise. Must match stored noise shape.
-                
-            Returns:
-                The next noise increment shifted by loc.
-                
-            Raises:
-                RuntimeError: If the noise queue is empty.
-                ValueError: If requested size does not match stored noise shape.
-            """
-            if not self._noise_queue:
-                raise RuntimeError("Ran out of preloaded noise increments.")
-            noise = self._noise_queue.pop(0)
-            if size is not None and tuple(size) != noise.shape:
-                raise ValueError(
-                    f"Expected noise shape {size}, got {noise.shape} from preloaded queue."
-                )
-            return loc + noise
-
-    def _simulate_with_preloaded_noise(noise_queue, steps, dt, outer_rng):
-        """Simulate a trajectory using preloaded noise increments for reproducibility.
-        
-        Temporarily patches np.random.default_rng to inject preloaded noise,
-        ensuring the same noise is used across simulations with different timesteps.
-        
-        Args:
-            noise_queue: List of noise increments to use in simulation.
-            steps: Number of timesteps to simulate.
-            dt: Timestep size.
-            outer_rng: Random number generator (unused due to noise patching).
-            
-        Returns:
-            Array of field values at each timestep.
-        """
-        original_default_rng = np.random.default_rng
-        next_index = 0
-
-        def patched_default_rng(*args, **kwargs):
-            nonlocal next_index
-            if next_index != 0:
-                raise RuntimeError("Only one trajectory should be simulated per preloaded noise queue.")
-            next_index += 1
-            return _PreloadedGenerator(noise_queue)
-
-        np.random.default_rng = patched_default_rng
-        try:
-            trajectory = simulate_fn(
-                T_steps=steps,
-                u_0=u0,
-                dt=dt,
-                dx=dx,
-                beta=beta,
-                nu=nu,
-                rng=outer_rng,
-            )
-        finally:
-            np.random.default_rng = original_default_rng
-
-        return np.asarray(trajectory)
-
     def _simulate_trajectory_from_noise(noise_increments, dt):
-        steps = len(noise_increments)
-        outer_rng = np.random.default_rng(rng.integers(0, 2**32 - 1))
-        return _simulate_with_preloaded_noise(noise_increments, steps, dt, outer_rng)
+        """Simulate a trajectory driven by the given noise increments.
+
+        Passing a `PreloadedGenerator` as `rng` ensures the same Brownian path is
+        used across simulations with different timesteps.
+        """
+        trajectory = simulate_fn(
+            T_steps=len(noise_increments),
+            u_0=u0,
+            dt=dt,
+            dx=dx,
+            beta=beta,
+            nu=nu,
+            rng=PreloadedGenerator(noise_increments),
+        )
+        return np.asarray(trajectory)
 
     dt_ref = base_dt / (2**levels)
     steps_ref = max(1, int(np.round(T / dt_ref)))
@@ -171,4 +146,4 @@ def run_dt_refinement(
         results.append({"dt": dt, "strong_L2": strong_L2})
         print(f"dt={dt:.5f}  strong L2={strong_L2:.4e}")
 
-    return results
+    return results

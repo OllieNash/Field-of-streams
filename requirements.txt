@@ -1,3 +1,4 @@
 numpy>=1.23
 matplotlib>=3.5
+scipy>=1.8
 # Optional: add more packages used in experiments (e.g., scipy, jax)

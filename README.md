@@ -8,7 +8,7 @@ empirically testing weak and strong convergence properties.
 Quick overview
 --------------
 - Language: Python 3.8+
-- Minimal dependencies: `numpy`, `matplotlib`
+- Minimal dependencies: `numpy`, `matplotlib`, `scipy`
 
 Install
 -------
@@ -17,15 +17,16 @@ Create a virtual environment and install the basics:
 ```bash
 python -m venv .venv
 source .venv/bin/activate   # or .venv\Scripts\activate on Windows
-pip install numpy matplotlib
+pip install -r requirements.txt
 ```
 
 Folder structure
 ----------------
 - `heat_eqn/` — SPDE simulation code and experiments
 	- `Convergence.py` — time-step refinement study utilities and strong-L2 error measurement
-	- `main.py` — experiment runners (entry points for demo simulations)
+	- `main.py` — strong convergence study (`--fem` to use the finite element solver)
 	- `stochastic_heat.py` — one-step and multi-step stochastic heat solver (`simulate_spde`, `multi_sim`)
+	- `stochastic_heat_fem.py` — P1 finite element solver (`simulate_spde_fem`, `multi_sim_fem`)
 	- `stationary_heat.py` — scripts to explore stationary behaviour (utilities)
 	- `maths/` — supporting math notes and derivations
 
@@ -46,6 +47,10 @@ What each component does
 - `simulate_spde` / `multi_sim` (in `heat_eqn/stochastic_heat.py`): construct a
 	single-step (and multi-step) integrator for the stochastic heat equation and
 	convenience functions for producing trajectories.
+- `simulate_spde_fem` / `multi_sim_fem` (in `heat_eqn/stochastic_heat_fem.py`):
+	P1 finite elements on a periodic mesh with a theta-scheme Euler–Maruyama step
+	(derivation in `heat_eqn/maths/Maths_Firedrake.md`). Same interface as
+	`multi_sim`, so both solvers can be driven by the same noise.
 - `Convergence.run_dt_refinement`: runs a refinement experiment re-using the
 	same noise increments across resolutions and reports strong-L2 errors.
 - `Plotter.py`: convenience plotting functions used by notebooks and demo
@@ -57,6 +62,19 @@ Running the demos
 
 ```bash
 python utils/heat.py
+```
+
+- To compare the finite element and spectral solvers and check the stationary
+	variance (figures are saved to `figures/`):
+
+```bash
+python heat_eqn/stochastic_heat_fem.py
+```
+
+- To run the strong convergence study (spectral, or FEM with `--fem`):
+
+```bash
+python heat_eqn/main.py --fem
 ```
 
 - To run other experiments, open `heat_eqn/main.py` or call the functions from a

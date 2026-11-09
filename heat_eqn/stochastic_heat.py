@@ -110,7 +110,7 @@ def multi_sim(
     u.append(u_0)
     u_prev =u_0
     for t in range(0,T_steps):
-            u_next = simulate_spde(u_prev, dt=dt, dx=dx, beta=0.1, nu=0.5, rng=rng)
+            u_next = simulate_spde(u_prev, dt=dt, dx=dx, beta=beta, nu=nu, rng=rng)
             u.append(u_next)
             u_prev = u_next
     return u

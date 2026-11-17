@@ -11,6 +11,9 @@ An Explicit link between Gaussian fields and Gaussian Markov random fields:  htt
 Tutorial on FEM for SPDEs:
 https://arxiv.org/abs/1803.03765 
 
+FEM parabolic SPDEs: 
+https://arxiv.org/pdf/2502.16854 
+
 Simulation schemes for SDEs: 
 https://arxiv.org/pdf/2508.19040 
 https://wias-berlin.de/people/bayerc/files/euler_talk_handout.pdf 
